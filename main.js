@@ -10,10 +10,7 @@ let myMods = {
     qn,
 };
 
-//启动服务器
-
-
-//生成路由
+//模块初始化，生成路由，启动服务器
 async function modInit(name, mod) {
     var initRes = mod.init ? await mod.init() : true;
     if(!initRes) {
@@ -37,9 +34,11 @@ async function init() {
     app.listen(3300);
 };
 
-init();
 app.use(router.routes());
 app.use(router.allowedMethods());
+
+//启动服务器
+init();
 console.log(`Server is running on port 3300...`);
 
 
