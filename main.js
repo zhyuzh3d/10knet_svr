@@ -1,46 +1,23 @@
-const Koa = require('koa');
-const Router = require('koa-router');
-const qn = require('./apis/qn.js');
+//服务端主程序入口文件,引入的模块都以$开头驼峰式以便识别
+const $koa = require('koa');
+const $config = require('./my_modules/config.js');
+const $zrouter = require('./my_modules/zrouter.js');
 
-const app = new Koa();
-var router = new Router();
-
-//自定义模块，赋予到global，自动将mod.apis添加到路由
-let myMods = {
-    qn,
+//所有路由模块,将被zrouter自动载入
+const qiniu = require('./api_modules/qiniu.js');
+const test = require('./api_modules/test.js');
+let apis = {
+    qiniu,
+    test,
 };
 
-//模块初始化，生成路由，启动服务器
-async function modInit(name, mod) {
-    var initRes = mod.init ? await mod.init() : true;
-    if(!initRes) {
-        console.log(`Mod ${name} init failed:${initRes}.\n`);
-        return false;
-    } else {
-        global['$' + name] = mod;
-        if(mod.apis) {
-            for(k in mod.apis) {
-                router.get(`/${name}/${k}`, mod.apis[k]);
-            };
-        };
-        return true;
-    };
-};
-
-async function init() {
-    for(k in myMods) {
-        await modInit(k, myMods[k]);
-    };
-    app.listen(3300);
-};
-
-app.use(router.routes());
-app.use(router.allowedMethods());
-
-//启动服务器
-init();
-console.log(`Server is running on port 3300...`);
-
+//创建服务器程序，载入路由
+const app = new $koa();
+(async function init() {
+    await $zrouter.init(app, apis);
+    app.listen($config.port);
+    console.log(`[main]Server is running on port 3300.`);
+})();
 
 //支持控制台重启核退出命令,不区分大小写
 process.stdin.setEncoding('utf8');
