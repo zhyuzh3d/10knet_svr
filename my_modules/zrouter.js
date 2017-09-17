@@ -37,8 +37,19 @@ async function initMod(name, mod) {
         for(k in mod.apis) {
             if(!mod.method) mod.method = 'all';
             mod.method = mod.method.toLocaleLowerCase();
-            let path = `/api/${name}/${k}`
-            krouter[mod.method](path, genHandler(path, mod.method, mod.apis[k]));
+
+            var apiObj = mod.apis[k];
+            let path = `/api/${name}/${k}`;
+
+            //添加单个api接口
+            krouter[mod.method](path, genHandler(path, mod.method, apiObj));
+
+            //自动添加api-info接口
+            if(apiObj.info !== undefined) {
+                const infoPath = path + '-info';
+                let infoApi = genInfoApiObj(apiObj);
+                krouter.get(infoPath, genHandler(infoPath, 'get', infoApi));
+            };
         };
     };
 };
@@ -46,12 +57,14 @@ async function initMod(name, mod) {
 
 /**
  * 生成单个api处理函数，合并validator和handler函数;遇到异常直接返回错误
- * @param   {object} apiObj {info,validator,method,handler}
+ * @param   {string}   path   api路径/api/test/demo
+ * @param   {string}   method get/post/all
+ * @param   {object}   apiObj {info,validator,method,handler}
  * @returns {function} async函数
  */
 function genHandler(path, method, apiObj) {
     const handler = async(ctx, next) => {
-        console.log(`[zrouter]${method.toUpperCase()}:${path}.`);
+        console.log(`[zrouter]${method.toUpperCase()}:${path}.`); //测试输出
         try {
             apiObj.validator && await validate(ctx, apiObj);
             if(apiObj.handler) {
@@ -69,6 +82,31 @@ function genHandler(path, method, apiObj) {
         };
     };
     return handler;
+};
+
+
+/**
+ * 生成单个api-info对象，转化validator每个值为字符串，否则不能传递出去
+ * @param   {object}   apiObj {info,validator,method,handler}
+ * @returns {function} async函数
+ */
+function genInfoApiObj(apiObj) {
+    var valiInfo = {};
+    if(apiObj.validator) {
+        for(k in apiObj.validator) {
+            valiInfo[k] = String(apiObj.validator[k]);
+        };
+    };
+    const infoApiObj = {
+        handler: async(ctx, next) => {
+            var infoRes = {
+                info: apiObj.info,
+                validator: valiInfo,
+            };
+            ctx.body = infoRes;
+        }
+    };
+    return infoApiObj;
 };
 
 

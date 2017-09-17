@@ -9,10 +9,10 @@ module.exports = {
                 ctx.body = 'Just a api test.';
             },
             validator: { //可选
-                uid: /^(undefined|\d{1,16})$/, //正则表达式验证，可选undefined
                 name: function(ipt, ctx) { //函数验证必须返回真假，须返回真假值
                     return ipt == 'admin';
                 },
+                uid: /^(undefined|\d{1,16})$/, //正则表达式验证，可选undefined
             },
             validator_bak: function(ctx) { //手工处理异常
                 if(ctx.query.uid != 31) throw Error('用户ID格式非法,uid必须是31');

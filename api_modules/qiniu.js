@@ -33,17 +33,15 @@ const conf = {
 let mac = new $qiniu.auth.digest.Mac(conf.ACCESS_KEY, conf.SECRET_KEY);
 
 
-
 //API--用户上传文件后七牛回调接口
 const uploadCallback = {
-    tip: '',
+    info: '...',
     validator: {
         //对请求合法性检查可以放在这里，参照七牛文档
     },
     handler: async function(ctx) {
         //限制文件大小和类型可以放在这里,超过限制的可以在这里删除它
-        console.log('>>>>body', ctx.body);
-        ctx.body = { success: true }; //必须返回字段，否则七牛报错579
+        ctx.body = { code: 1, message: '上传成功' }; //必须返回字段，否则七牛报错579
     },
 };
 
@@ -51,7 +49,7 @@ const uploadCallback = {
 
 //API--获取随机上传token的接口，允许匿名上传
 const uploadTokenRand = {
-    tip: '',
+    info: '',
     validator: {
         token: /^(undefined|.{3,32})$/,
         tag: /^(undefined|.{3,32})$/,
