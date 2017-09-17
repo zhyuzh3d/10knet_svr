@@ -1,5 +1,7 @@
 //服务端主程序入口文件,引入的模块都以$开头驼峰式以便识别
 const $koa = require('koa');
+const $koaBodyParser = require('koa-bodyparser');
+
 const $config = require('./my_modules/config.js');
 const $zrouter = require('./my_modules/zrouter.js');
 
@@ -14,9 +16,10 @@ let apis = {
 //创建服务器程序，载入路由
 const app = new $koa();
 (async function init() {
+    app.use($koaBodyParser());
     await $zrouter.init(app, apis);
     app.listen($config.port);
-    console.log(`[main]Server is running on port 3300.`);
+    console.log(`[main]Server is running on port ${$config.port}.`);
 })();
 
 //支持控制台重启核退出命令,不区分大小写

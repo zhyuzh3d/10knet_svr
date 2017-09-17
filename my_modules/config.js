@@ -1,7 +1,7 @@
-const $xconfig = require('../../xconfig.js');
+const $xconfig = require('../../xconf/secret/xconfig.js');
 
 var config = {
-    port: 3300,
+    port: 3100,
     domain: 'web.10knet.com',
     qiniu_BucketName: '10knet-web',
     qiniu_BucketDomain: 'web.10knet.com',

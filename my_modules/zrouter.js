@@ -1,6 +1,6 @@
 //载入各个api模块，自动初始化，自动将apis加入到路由;
 //每个api模块提供初始化async函数、多个api对象、公用函数；
-//{init(app),apis:{apiname:{info,validator,method},...},fns:{}}
+//{init(app),apis:{apiname:{info,validator,method,handler},...},fns:{}}
 //每个api将被赋值到global[_name]上以便于公开调用
 //模块示例参见api_modules/test.js
 
@@ -35,7 +35,10 @@ async function initMod(name, mod) {
     mod.init ? await mod.init(theApp) : true;
     if(mod.apis) {
         for(k in mod.apis) {
-            krouter.all(`/api/${name}/${k}`, genHandler(mod.apis[k]));
+            if(!mod.method) mod.method = 'all';
+            mod.method = mod.method.toLocaleLowerCase();
+            let path = `/api/${name}/${k}`
+            krouter[mod.method](path, genHandler(path, mod.method, mod.apis[k]));
         };
     };
 };
@@ -43,14 +46,19 @@ async function initMod(name, mod) {
 
 /**
  * 生成单个api处理函数，合并validator和handler函数;遇到异常直接返回错误
- * @param   {object} apiObj {info,validator,method}
+ * @param   {object} apiObj {info,validator,method,handler}
  * @returns {function} async函数
  */
-function genHandler(apiObj) {
+function genHandler(path, method, apiObj) {
     const handler = async(ctx, next) => {
+        console.log(`[zrouter]${method.toUpperCase()}:${path}.`);
         try {
             apiObj.validator && await validate(ctx, apiObj);
-            apiObj.method && await apiObj.method(ctx, next);
+            if(apiObj.handler) {
+                await apiObj.handler(ctx, next);
+            } else {
+                ctx.body = `[zrouter]${method.toUpperCase()}:${path}:handler not found.`
+            };
         } catch(err) {
             ctx.body = {
                 code: 0,
@@ -68,7 +76,7 @@ function genHandler(apiObj) {
  * 每个实例默认的认证方法，使用validator每个key的表达式进行验证，遇到非法即抛出异常；
  * 如果validator是个async(ctx, apiObj)函数，那么直接调用这个函数，不做其他处理
  * 支持url参数和body参数，验证通过后记入ctx.xdata
- * @param {object} apiObj {info,validator,method}
+ * @param {object} apiObj {info,validator,method,handler}
  * @param {object} ctx    ctx
  * @throws {Error} err
  */
@@ -77,6 +85,9 @@ async function validate(ctx, apiObj) {
         apiObj.validator(ctx, apiObj);
     } else if(apiObj.validator.constructor == Object) {
         for(var key in apiObj.validator) {
+            console.log('zrouter,ctx.query[key]',ctx.query[key]);
+            console.log('zrouter,ctx.request.body',ctx.request.body);
+            console.log('zrouter,ctx.request',ctx.request);
             var inputValue = ctx.query[key] || (ctx.request.body && ctx.request.body[key]);
             var vali = apiObj.validator[key];
             var legal = true;
