@@ -2,9 +2,9 @@ const $xconfig = require('../../xconf/secret/xconfig.js');
 
 var config = {
     port: 3100,
-    domain: 'web.10knet.com',
-    qiniu_BucketName: '10knet-web',
-    qiniu_BucketDomain: 'web.10knet.com',
+    domain: '10knet.com',
+    qiniu_BucketName: '10knet-up',
+    qiniu_BucketDomain: 'up.10knet.com',
 };
 config = Object.assign(config, $xconfig);
 

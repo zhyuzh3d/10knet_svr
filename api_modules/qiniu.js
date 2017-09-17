@@ -17,7 +17,7 @@ const conf = {
     Port: 19110,
     Uptoken_Url: "/uptoken",
     Domain: "http://qiniu-plupload.qiniudn.com/",
-    UploadCallbackUrl: `http://${$config.domain}/api/qn/uploadCallback`,
+    UploadCallbackUrl: `http://${$config.domain}/api/qiniu/uploadCallback`,
     BucketName: $config.qiniu_BucketName,
     BucketDomain: $config.qiniu_BucketDomain,
     ACCESS_KEY: $config.qiniu_ACCESS_KEY,
@@ -42,8 +42,11 @@ const uploadCallback = {
     },
     handler: async function(ctx) {
         //限制文件大小和类型可以放在这里,超过限制的可以在这里删除它
+        console.log('>>>>body', ctx.body);
+        ctx.body = { success: true }; //必须返回字段，否则七牛报错579
     },
 };
+
 
 
 //API--获取随机上传token的接口，允许匿名上传

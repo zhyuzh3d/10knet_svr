@@ -85,9 +85,6 @@ async function validate(ctx, apiObj) {
         apiObj.validator(ctx, apiObj);
     } else if(apiObj.validator.constructor == Object) {
         for(var key in apiObj.validator) {
-            console.log('zrouter,ctx.query[key]',ctx.query[key]);
-            console.log('zrouter,ctx.request.body',ctx.request.body);
-            console.log('zrouter,ctx.request',ctx.request);
             var inputValue = ctx.query[key] || (ctx.request.body && ctx.request.body[key]);
             var vali = apiObj.validator[key];
             var legal = true;
