@@ -1,6 +1,7 @@
 //服务端主程序入口文件,引入的模块都以$开头驼峰式以便识别
 const $koa = require('koa');
 const $koaBodyParser = require('koa-bodyparser');
+const cors = require('koa-cors');
 
 const $config = require('./my_modules/config.js');
 const $zrouter = require('./my_modules/zrouter.js');
@@ -15,6 +16,7 @@ let apis = {
 
 //创建服务器程序，载入路由
 const app = new $koa();
+app.use(cors());
 (async function init() {
     app.use($koaBodyParser());
     await $zrouter.init(app, apis);
